@@ -2,15 +2,19 @@ import streamlit as st
 import random
 import json
 import os
+import pickle
 from typing import Dict, List, Tuple
 from pathlib import Path
+
+# File to store persistent statistics
+STATS_FILE = "osteology_stats.pkl"
 
 # Anatomical data extracted from the PDF
 ANATOMICAL_DATA = {
     "Scapula": {
         "title": "Scapula gauche de cheval",
         "views": ["Médiale", "Latérale"],
-        "image_files": ["scapula_mediale.png", "scapula_laterale.png"],
+        "image_files": ["scapula_mediale.jpg", "scapula_laterale.jpg"],
         "components": {
             1: "Cartilage scapulaire",
             2: "Bord dorsal ou vertébral", 
@@ -41,7 +45,7 @@ ANATOMICAL_DATA = {
     "Humérus": {
         "title": "Humérus gauche de cheval",
         "views": ["Crâniale", "Latérale", "Caudale", "Médiale"],
-        "image_files": ["humerus_craniale.png", "humerus_laterale.png", "humerus_caudale.png", "humerus_mediale.png"],
+        "image_files": ["humerus_craniale.jpg", "humerus_laterale.jpg", "humerus_caudale.jpg", "humerus_mediale.jpg"],
         "components": {
             1: "Tubercule mineur",
             2: "Sillon intertuberculaire",
@@ -78,7 +82,7 @@ ANATOMICAL_DATA = {
     "Radius et Ulna": {
         "title": "Radius et ulna gauches de cheval",
         "views": ["Dorsale", "Latérale", "Palmaire", "Médiale"],
-        "image_files": ["radius_ulna_dorsale.png", "radius_ulna_laterale.png", "radius_ulna_palmaire.png", "radius_ulna_mediale.png"],
+        "image_files": ["radius_ulna_dorsale.jpg", "radius_ulna_laterale.jpg", "radius_ulna_palmaire.jpg", "radius_ulna_mediale.jpg"],
         "components": {
             1: "Tubérosité de l'olécrâne",
             2: "Bord crânial de l'olécrâne",
@@ -109,7 +113,7 @@ ANATOMICAL_DATA = {
     "Carpe": {
         "title": "Carpe gauche de cheval",
         "views": ["Dorsale", "Latérale", "Médiale", "Dorsale (os disjoints)"],
-        "image_files": ["carpe_dorsale.png", "carpe_laterale.png", "carpe_mediale.png", "carpe_dorsale_disjoints.png"],
+        "image_files": ["carpe_dorsale.jpg", "carpe_laterale.jpg", "carpe_mediale.jpg", "carpe_dorsale_disjoints.jpg"],
         "components": {
             1: "Radius (extrémité distale)",
             2: "Sillon pour l'ext. radial carpe",
@@ -136,7 +140,7 @@ ANATOMICAL_DATA = {
     "Métacarpe": {
         "title": "Métacarpe gauche de cheval",
         "views": ["Dorsale", "Latérale", "Palmaire (os disjoints)"],
-        "image_files": ["metacarpe_dorsale.png", "metacarpe_laterale.png", "metacarpe_palmaire.png"],
+        "image_files": ["metacarpe_dorsale.jpg", "metacarpe_laterale.jpg", "metacarpe_palmaire.jpg"],
         "components": {
             1: "Tubérosité dorso-médiale",
             2: "Métacarpien IV",
@@ -166,7 +170,7 @@ ANATOMICAL_DATA = {
     "Phalanges": {
         "title": "Os du doigt de cheval",
         "views": ["Latérale", "Proximale", "Dorsale", "Distale"],
-        "image_files": ["phalanges_laterale.png", "phalanges_proximale.png", "phalanges_dorsale.png", "phalanges_distale.png"],
+        "image_files": ["phalanges_laterale.jpg", "phalanges_proximale.jpg", "phalanges_dorsale.jpg", "phalanges_distale.jpg"],
         "components": {
             1: "Métacarpien principal (III)",
             2: "Phalange proximale",
@@ -198,7 +202,7 @@ ANATOMICAL_DATA = {
     "Vertèbres Cervicales": {
         "title": "Vertèbres cervicales de cheval",
         "views": ["Latérale", "Dorsale", "Ventrale"],
-        "image_files": ["vertebres_cervicales_laterale.png", "vertebres_cervicales_dorsale.png", "vertebres_cervicales_ventrale.png"],
+        "image_files": ["vertebres_cervicales_laterale.jpg", "vertebres_cervicales_dorsale.jpg", "vertebres_cervicales_ventrale.jpg"],
         "components": {
             1: "Processus épineux",
             2: "Processus articulaire crânial",
@@ -217,7 +221,7 @@ ANATOMICAL_DATA = {
     "Fémur": {
         "title": "Fémur de cheval",
         "views": ["Crâniale", "Caudale", "Médiale", "Latérale"],
-        "image_files": ["femur_craniale.png", "femur_caudale.png", "femur_mediale.png", "femur_laterale.png"],
+        "image_files": ["femur_craniale.jpg", "femur_caudale.jpg", "femur_mediale.jpg", "femur_laterale.jpg"],
         "components": {
             1: "Sommet du grand trochanter",
             2: "Convexité du grand trochanter",
@@ -250,7 +254,7 @@ ANATOMICAL_DATA = {
     "Tibia et Fibula": {
         "title": "Tibia et fibula gauches de cheval",
         "views": ["Crâniale", "Caudale", "Latérale", "Médiale"],
-        "image_files": ["tibia_fibula_craniale.png", "tibia_fibula_caudale.png", "tibia_fibula_laterale.png", "tibia_fibula_mediale.png"],
+        "image_files": ["tibia_fibula_craniale.jpg", "tibia_fibula_caudale.jpg", "tibia_fibula_laterale.jpg", "tibia_fibula_mediale.jpg"],
         "components": {
             1: "Condyle médial",
             2: "Eminence intercondylaire",
@@ -273,8 +277,56 @@ ANATOMICAL_DATA = {
     }
 }
 
+def load_persistent_stats():
+    """Load statistics from file."""
+    try:
+        if os.path.exists(STATS_FILE):
+            with open(STATS_FILE, 'rb') as f:
+                stats = pickle.load(f)
+            return stats
+        else:
+            return {
+                'total_score': 0,
+                'total_questions': 0,
+                'best_streak': 0,
+                'sessions_played': 0,
+                'last_celebration_streak': 0
+            }
+    except:
+        return {
+            'total_score': 0,
+            'total_questions': 0,
+            'best_streak': 0,
+            'sessions_played': 0,
+            'last_celebration_streak': 0
+        }
+
+def save_persistent_stats():
+    """Save statistics to file."""
+    try:
+        stats = {
+            'total_score': st.session_state.get('persistent_total_score', 0),
+            'total_questions': st.session_state.get('persistent_total_questions', 0),
+            'best_streak': st.session_state.get('persistent_best_streak', 0),
+            'sessions_played': st.session_state.get('persistent_sessions_played', 0),
+            'last_celebration_streak': st.session_state.get('last_celebration_streak', 0)
+        }
+        with open(STATS_FILE, 'wb') as f:
+            pickle.dump(stats, f)
+    except:
+        pass  # Fail silently if can't save
+
+def show_celebration_message():
+    """Show Ernesto's celebration message."""
+    st.success("🎉 Wow Caro! You're going great! Keep pushing ❤️\n\nYours Ernesto")
+    st.balloons()
+
 def initialize_session_state():
     """Initialize session state variables."""
+    # Load persistent stats
+    persistent_stats = load_persistent_stats()
+    
+    # Session-specific stats
     if 'score' not in st.session_state:
         st.session_state.score = 0
     if 'total_questions' not in st.session_state:
@@ -289,6 +341,24 @@ def initialize_session_state():
         st.session_state.streak = 0
     if 'best_streak' not in st.session_state:
         st.session_state.best_streak = 0
+    
+    # Persistent stats
+    if 'persistent_total_score' not in st.session_state:
+        st.session_state.persistent_total_score = persistent_stats['total_score']
+    if 'persistent_total_questions' not in st.session_state:
+        st.session_state.persistent_total_questions = persistent_stats['total_questions']
+    if 'persistent_best_streak' not in st.session_state:
+        st.session_state.persistent_best_streak = persistent_stats['best_streak']
+    if 'persistent_sessions_played' not in st.session_state:
+        st.session_state.persistent_sessions_played = persistent_stats['sessions_played']
+    if 'last_celebration_streak' not in st.session_state:
+        st.session_state.last_celebration_streak = persistent_stats['last_celebration_streak']
+    
+    # Mark as new session if this is the first time
+    if 'session_initialized' not in st.session_state:
+        st.session_state.persistent_sessions_played += 1
+        st.session_state.session_initialized = True
+        save_persistent_stats()
 
 def generate_question(selected_bones: List[str]) -> Tuple[str, int, str, str]:
     """Generate a random question from selected bone groups."""
@@ -475,14 +545,30 @@ def main():
         
         # Statistics
         st.subheader("📊 Statistiques")
+        
+        # Session stats
+        st.markdown("**Cette session:**")
         if st.session_state.total_questions > 0:
-            accuracy = (st.session_state.score / st.session_state.total_questions) * 100
-            st.metric("Précision", f"{accuracy:.1f}%")
+            session_accuracy = (st.session_state.score / st.session_state.total_questions) * 100
+            st.metric("Précision", f"{session_accuracy:.1f}%")
             st.metric("Score", f"{st.session_state.score}/{st.session_state.total_questions}")
             st.metric("Série actuelle", st.session_state.streak)
-            st.metric("Meilleure série", st.session_state.best_streak)
+            st.metric("Meilleure série (session)", st.session_state.best_streak)
         else:
-            st.info("Commencez le quiz pour voir vos statistiques!")
+            st.info("Commencez le quiz pour voir vos statistiques de session!")
+        
+        st.markdown("---")
+        
+        # Persistent stats
+        st.markdown("**Statistiques globales:**")
+        if st.session_state.persistent_total_questions > 0:
+            total_accuracy = (st.session_state.persistent_total_score / st.session_state.persistent_total_questions) * 100
+            st.metric("Précision totale", f"{total_accuracy:.1f}%")
+            st.metric("Score total", f"{st.session_state.persistent_total_score}/{st.session_state.persistent_total_questions}")
+            st.metric("Meilleure série (toujours)", st.session_state.persistent_best_streak)
+            st.metric("Sessions jouées", st.session_state.persistent_sessions_played)
+        else:
+            st.info("Aucune statistique globale disponible encore!")
         
         if st.button("🔄 Réinitialiser", type="secondary"):
             reset_game()
@@ -551,27 +637,44 @@ def main():
                 
                 if submit_button and user_answer:
                     st.session_state.total_questions += 1
+                    st.session_state.persistent_total_questions += 1
                     is_correct = check_answer(user_answer, correct_answer)
                     
                     if is_correct:
                         st.session_state.score += 1
+                        st.session_state.persistent_total_score += 1
                         st.session_state.streak += 1
+                        
+                        # Update best streaks
                         if st.session_state.streak > st.session_state.best_streak:
                             st.session_state.best_streak = st.session_state.streak
+                        if st.session_state.streak > st.session_state.persistent_best_streak:
+                            st.session_state.persistent_best_streak = st.session_state.streak
+                        
                         st.success(f"🎉 Correct! La réponse était: **{correct_answer}**")
-                        if st.session_state.streak > 1:
+                        
+                        # Special celebration message for 5 in a row
+                        if st.session_state.streak == 5 and st.session_state.last_celebration_streak != st.session_state.streak:
+                            st.session_state.last_celebration_streak = st.session_state.streak
+                            show_celebration_message()
+                        elif st.session_state.streak > 1:
                             st.balloons()
+                            
                     else:
                         st.session_state.streak = 0
                         st.error(f"❌ Incorrect. La bonne réponse était: **{correct_answer}**")
                         st.info(f"Votre réponse: *{user_answer}*")
                     
+                    # Save persistent stats
+                    save_persistent_stats()
                     st.session_state.answer_submitted = True
                     
                 elif skip_button:
                     st.session_state.total_questions += 1
+                    st.session_state.persistent_total_questions += 1
                     st.session_state.streak = 0
                     st.warning(f"⏭️ Question passée. La réponse était: **{correct_answer}**")
+                    save_persistent_stats()
                     st.session_state.answer_submitted = True
                 
                 elif submit_button and not user_answer:

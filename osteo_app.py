@@ -14,7 +14,7 @@ ANATOMICAL_DATA = {
     "Scapula": {
         "title": "Scapula gauche de cheval",
         "views": ["Médiale", "Latérale"],
-        "image_files": ["scapula_mediale.png", "scapula_laterale.png"],
+        "image_files": ["scapula_mediale.jpg", "scapula_laterale.jpg"],
         "components": {
             1: "Cartilage scapulaire",
             2: "Bord dorsal ou vertébral", 
@@ -45,7 +45,7 @@ ANATOMICAL_DATA = {
     "Humérus": {
         "title": "Humérus gauche de cheval",
         "views": ["Crâniale", "Latérale", "Caudale", "Médiale"],
-        "image_files": ["humerus_craniale.png", "humerus_laterale.png", "humerus_caudale.png", "humerus_mediale.png"],
+        "image_files": ["humerus_craniale.jpg", "humerus_laterale.jpg", "humerus_caudale.jpg", "humerus_mediale.jpg"],
         "components": {
             1: "Tubercule mineur",
             2: "Sillon intertuberculaire",
@@ -82,7 +82,7 @@ ANATOMICAL_DATA = {
     "Radius et Ulna": {
         "title": "Radius et ulna gauches de cheval",
         "views": ["Dorsale", "Latérale", "Palmaire", "Médiale"],
-        "image_files": ["radius_ulna_dorsale.png", "radius_ulna_laterale.png", "radius_ulna_palmaire.png", "radius_ulna_mediale.png"],
+        "image_files": ["radius_ulna_dorsale.jpg", "radius_ulna_laterale.jpg", "radius_ulna_palmaire.jpg", "radius_ulna_mediale.jpg"],
         "components": {
             1: "Tubérosité de l'olécrâne",
             2: "Bord crânial de l'olécrâne",
@@ -113,7 +113,7 @@ ANATOMICAL_DATA = {
     "Carpe": {
         "title": "Carpe gauche de cheval",
         "views": ["Dorsale", "Latérale", "Médiale", "Dorsale (os disjoints)"],
-        "image_files": ["carpe_dorsale.png", "carpe_laterale.png", "carpe_mediale.png", "carpe_dorsale_disjoints.png"],
+        "image_files": ["carpe_dorsale.jpg", "carpe_laterale.jpg", "carpe_mediale.jpg", "carpe_dorsale_disjoints.jpg"],
         "components": {
             1: "Radius (extrémité distale)",
             2: "Sillon pour l'ext. radial carpe",
@@ -140,7 +140,7 @@ ANATOMICAL_DATA = {
     "Métacarpe": {
         "title": "Métacarpe gauche de cheval",
         "views": ["Dorsale", "Latérale", "Palmaire (os disjoints)"],
-        "image_files": ["metacarpe_dorsale.png", "metacarpe_laterale.png", "metacarpe_palmaire.png"],
+        "image_files": ["metacarpe_dorsale.jpg", "metacarpe_laterale.jpg", "metacarpe_palmaire.jpg"],
         "components": {
             1: "Tubérosité dorso-médiale",
             2: "Métacarpien IV",
@@ -170,7 +170,7 @@ ANATOMICAL_DATA = {
     "Phalanges": {
         "title": "Os du doigt de cheval",
         "views": ["Latérale", "Proximale", "Dorsale", "Distale"],
-        "image_files": ["phalanges_laterale.png", "phalanges_proximale.png", "phalanges_dorsale.png", "phalanges_distale.png"],
+        "image_files": ["phalanges_laterale.jpg", "phalanges_proximale.jpg", "phalanges_dorsale.jpg", "phalanges_distale.jpg"],
         "components": {
             1: "Métacarpien principal (III)",
             2: "Phalange proximale",
@@ -202,7 +202,7 @@ ANATOMICAL_DATA = {
     "Vertèbres Cervicales": {
         "title": "Vertèbres cervicales de cheval",
         "views": ["Latérale", "Dorsale", "Ventrale"],
-        "image_files": ["vertebres_cervicales_laterale.png", "vertebres_cervicales_dorsale.png", "vertebres_cervicales_ventrale.png"],
+        "image_files": ["vertebres_cervicales_laterale.jpg", "vertebres_cervicales_dorsale.jpg", "vertebres_cervicales_ventrale.jpg"],
         "components": {
             1: "Processus épineux",
             2: "Processus articulaire crânial",
@@ -221,7 +221,7 @@ ANATOMICAL_DATA = {
     "Fémur": {
         "title": "Fémur de cheval",
         "views": ["Crâniale", "Caudale", "Médiale", "Latérale"],
-        "image_files": ["femur_craniale.png", "femur_caudale.png", "femur_mediale.png", "femur_laterale.png"],
+        "image_files": ["femur_craniale.jpg", "femur_caudale.jpg", "femur_mediale.jpg", "femur_laterale.jpg"],
         "components": {
             1: "Sommet du grand trochanter",
             2: "Convexité du grand trochanter",
@@ -254,7 +254,7 @@ ANATOMICAL_DATA = {
     "Tibia et Fibula": {
         "title": "Tibia et fibula gauches de cheval",
         "views": ["Crâniale", "Caudale", "Latérale", "Médiale"],
-        "image_files": ["tibia_fibula_craniale.png", "tibia_fibula_caudale.png", "tibia_fibula_laterale.png", "tibia_fibula_mediale.png"],
+        "image_files": ["tibia_fibula_craniale.jpg", "tibia_fibula_caudale.jpg", "tibia_fibula_laterale.jpg", "tibia_fibula_mediale.jpg"],
         "components": {
             1: "Condyle médial",
             2: "Eminence intercondylaire",
@@ -317,98 +317,8 @@ def save_persistent_stats():
         pass  # Fail silently if can't save
 
 def show_celebration_message():
-    """Show Ernesto's celebration message as a dramatic full-screen overlay."""
-    # Create a dramatic full-screen celebration
-    st.markdown("""
-    <style>
-    @keyframes celebration-fade-in {
-        0% { 
-            opacity: 0; 
-            transform: scale(0.5); 
-        }
-        100% { 
-            opacity: 1; 
-            transform: scale(1); 
-        }
-    }
-    
-    .celebration-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        animation: celebration-fade-in 0.8s ease-out;
-        color: white;
-        text-align: center;
-        padding: 20px;
-        box-sizing: border-box;
-    }
-    
-    .celebration-title {
-        font-size: 4rem;
-        font-weight: bold;
-        margin-bottom: 2rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        animation: celebration-fade-in 1.2s ease-out;
-    }
-    
-    .celebration-message {
-        font-size: 2rem;
-        margin-bottom: 2rem;
-        max-width: 800px;
-        line-height: 1.4;
-        animation: celebration-fade-in 1.6s ease-out;
-    }
-    
-    .celebration-signature {
-        font-size: 1.5rem;
-        font-style: italic;
-        animation: celebration-fade-in 2s ease-out;
-    }
-    
-    .celebration-emojis {
-        font-size: 3rem;
-        margin: 1rem 0;
-        animation: celebration-fade-in 1.4s ease-out;
-    }
-    </style>
-    
-    <div class="celebration-overlay">
-        <div class="celebration-title">🎉 FANTÁSTICO! 🎉</div>
-        <div class="celebration-emojis">✨ 🌟 ⭐ 🌟 ✨</div>
-        <div class="celebration-message">
-            Wow Caro! You're going great!<br>
-            Keep pushing ❤️
-        </div>
-        <div class="celebration-signature">
-            Yours Ernesto
-        </div>
-        <div class="celebration-emojis">🐎 📚 💪</div>
-    </div>
-    
-    <script>
-    // Auto-hide the celebration after 4 seconds
-    setTimeout(function() {
-        const overlay = document.querySelector('.celebration-overlay');
-        if (overlay) {
-            overlay.style.transition = 'opacity 1s ease-out';
-            overlay.style.opacity = '0';
-            setTimeout(function() {
-                overlay.remove();
-            }, 1000);
-        }
-    }, 4000);
-    </script>
-    """, unsafe_allow_html=True)
-    
-    # Also trigger balloons
+    """Show Ernesto's celebration message."""
+    st.success("🎉 Wow Caro! You're going great! Keep pushing ❤️\n\nYours Ernesto")
     st.balloons()
 
 def initialize_session_state():

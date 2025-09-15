@@ -402,6 +402,28 @@ def reset_game():
     st.session_state.answer_submitted = False
     st.session_state.streak = 0
 
+def reset_all_stats():
+    """Reset all statistics including persistent ones."""
+    # Reset session stats
+    reset_game()
+    
+    # Reset persistent stats
+    st.session_state.persistent_total_score = 0
+    st.session_state.persistent_total_questions = 0
+    st.session_state.persistent_best_streak = 0
+    st.session_state.persistent_sessions_played = 0
+    st.session_state.last_celebration_streak = 0
+    
+    # Delete the stats file
+    try:
+        if os.path.exists(STATS_FILE):
+            os.remove(STATS_FILE)
+    except:
+        pass  # Fail silently if can't delete
+    
+    # Save empty stats
+    save_persistent_stats()
+
 def display_anatomical_image(bone_group: str, image_folder: str = "images"):
     """Display anatomical images for the given bone group."""
     bone_data = ANATOMICAL_DATA[bone_group]
@@ -571,8 +593,35 @@ def main():
             st.info("Aucune statistique globale disponible encore!")
         
         if st.button("🔄 Réinitialiser", type="secondary"):
-            reset_game()
-            st.rerun()
+            # Store confirmation state
+            st.session_state.show_reset_confirmation = True
+        
+        # Show confirmation dialog if needed
+        if st.session_state.get('show_reset_confirmation', False):
+            st.warning("⚠️ **Confirmation requise**")
+            
+            # Show current stats that will be lost
+            if st.session_state.persistent_total_questions > 0:
+                total_accuracy = (st.session_state.persistent_total_score / st.session_state.persistent_total_questions) * 100
+                st.markdown(f"""
+                **Toutes ces statistiques seront définitivement supprimées:**
+                - Score total: {st.session_state.persistent_total_score}/{st.session_state.persistent_total_questions}
+                - Précision globale: {total_accuracy:.1f}%
+                - Meilleure série: {st.session_state.persistent_best_streak}
+                - Sessions jouées: {st.session_state.persistent_sessions_played}
+                """)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("❌ Tout supprimer", type="primary"):
+                    reset_all_stats()
+                    st.session_state.show_reset_confirmation = False
+                    st.success("✅ Toutes les statistiques ont été supprimées!")
+                    st.rerun()
+            with col2:
+                if st.button("🚫 Annuler"):
+                    st.session_state.show_reset_confirmation = False
+                    st.rerun()
         
         st.divider()
         
